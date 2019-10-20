@@ -1,0 +1,115 @@
+live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi
+
+
+ffmpeg -f image2 -loop 1 -i image.png -f flv rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi
+
+
+rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi
+
+
+
+
+ffmpeg -f image2 -video_size 1920x1080 -framerate 24 -i image.png -vf scale=1280x720 -c:v h264 -g 24 -b:v 2M -preset ultrafast -pix_fmt yuv420p -f flv "rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi"
+
+
+
+
+
+
+ffmpeg -f image2 -loop 1 -i image.png -f flv image2.png
+
+
+
+
+ffmpeg -loop 1 -i http://test.dev/overlay.jpg -f flv rtmp://192.168.99.100:1935/live/mystream2
+
+
+ffmpeg -f image2 -loop 1 -i image.jpg -pix_fmt yuv420p -f flv "rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi"
+
+
+
+ffmpeg -s "1920x1080" -r "15" -f image2 -loop 1 -i image.jpg -b:v "1000k" -ab 96k -i 0 -vcodec libx264 -crf 23 -preset "ultrafast" -s "1280x720" -threads 0-pix_fmt yuv420p -f flv "rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi"
+
+ffmpeg
+-s "1920x1080"
+-r "15"
+-f image2
+-loop 1
+-i image.jpg
+-b:v "1000k"
+-ab 96k
+-i 0
+-vcodec libx264
+-crf 23
+-preset "ultrafast"
+-s "1280x720"
+-threads 0
+-pix_fmt yuv420p
+-f flv "rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi"
+
+
+
+
+ffmpeg -nostdin -framerate 15 -re -loop 1 -i in.png -f flv -vcodec libx264
+-pix_fmt yuv420p -preset slow -r 15
+-g 30 "rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi"
+
+ffmpeg -nostdin -framerate 15 -re -loop 1 -i in.png -f flv -vcodec libx264 -pix_fmt yuv420p -preset slow -r 15 -g 30 "rtmp://live-lhr.twitch.tv/app/live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi"
+
+
+var fs = require('fs'),
+    PNG = require('pngjs').PNG;
+ 
+fs.createReadStream('in.png')
+    .pipe(new PNG({
+        filterType: 4
+    }))
+    .on('parsed', function() {
+ 
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                var idx = (this.width * y + x) << 2;
+ 
+                // invert color
+                if (x > 70)
+                {
+                this.data[idx] = 0;
+                this.data[idx+1] = 0;
+                this.data[idx+2] = 255;
+                }
+ 
+                // and reduce opacity
+                this.data[idx+3] = this.data[idx+3] >> 1;
+            }
+        }
+ 
+        this.pack().pipe(fs.createWriteStream('in.png'));
+    });
+
+
+
+
+
+
+
+
+const ffmpeg = require('ffmpeg-cli');
+const imageController = require('./image-controller');
+const STREAM_ID = `live_468016471_gTJoiyNAMoOmwuQWdJAU6mHhJdOrdi`;
+const INGEST_ENDPOINT = `live-lhr`;
+const REFRESH_FLAGS = '-hls_list_size 30 -hls_flags delete_segments+append_list+omit_endlist';
+const SCALE_FLAGS = '-vf scale=1920x1080'
+const COMMANDS = `-nostdin -framerate 15 -re -loop 1 -i ${imageController.IMAGE_FILENAME} ${REFRESH_FLAGS} ${SCALE_FLAGS} -f flv -vcodec libx264 -pix_fmt yuv420p -preset slow -r 15 -g 30 "rtmp://${INGEST_ENDPOINT}.twitch.tv/app/${STREAM_ID}"`;
+
+const startStreaming = () =>
+{
+    ffmpeg.run(COMMANDS).catch((error) =>
+    {
+        console.error(error);
+    });
+};
+
+module.exports =
+{
+    startStreaming: startStreaming
+};

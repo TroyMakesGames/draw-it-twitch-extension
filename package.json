@@ -1,0 +1,16 @@
+{
+  "name": "empty-canvas",
+  "version": "0.0.1",
+  "description": "Paint on Twitch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Troy Atkinson",
+  "license": "ISC",
+  "dependencies": {
+    "ffmpeg-cli": "^2.2.0",
+    "pngjs": "^3.4.0",
+    "tmi.js": "^1.5.0"
+  }
+}
